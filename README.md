@@ -1,10 +1,13 @@
-# Learning Node + Redis Microservice basics
+# Ecommerce microservice with Express and Redis
 
-I now understand the advantages of using Node + Redis to cache requests. Thought I moved to a more slightly advanced topic - creating microservices using the Pub/Sub pattern. This is obviously for practice purposes and not in any way production-ready.
+Using Node + Redis to build e-commerce microservices using the Pub/Sub pattern. 
+This is obviously for practice purposes and not production-ready.
 
 ## Running the project
 
-- Install all dependencies by running `yarn`
+- Install all dependencies by running `yarn`in order-service and payment service folders
+- Run `yarn start` on each directory to start running services parallel
+- Use postman to make post requests
 
 ## What did I learn and discover?
 
