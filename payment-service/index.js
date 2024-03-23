@@ -1,39 +1,30 @@
-const express = require('express')
 const { publisher, consumer } = require('./config/redis')
+const { setPaymentStatus } = require('./helpers/paymentHelpers')
 
-const PORT = process.env.PORT || 4001
-const app = express()
-
-app.use(express.json())
-
-async function processPayment(){
-  let currentAmount = 700
+async function paymentProcessing(){
+  let currentAmount = 800
 
   await consumer.subscribe('NEW_ORDER', (message) => {
     const currentOrder = JSON.parse(message)
     const { totalPrice, time, item } = currentOrder
-    const isSuffiecientAmount = currentAmount >= totalPrice
+    const isSufficientAmount = currentAmount >= totalPrice
     const transactionAmount = currentAmount - totalPrice
-    
-    const setOrderStatus = (status, message)=> {
-      const transactionData = { balance: currentAmount, totalPrice, time }
-      const orderStatus = { ...transactionData, status, message, item }
-      console.log(`${status} | ${message} | ${time}`)
-      return JSON.stringify(orderStatus)
+
+    const statusOptions = {
+      name: item,
+      time,
+      totalPrice,
+      currentAmount
     }
 
-    if (isSuffiecientAmount){
-      currentAmount = transactionAmount
-      publisher.publish('ORDER_STATUS', setOrderStatus('success', 'Payment processed'))
+    if (!isSufficientAmount) {
+      publisher.publish('ORDER_STATUS', setPaymentStatus('error', 'Payment declined', statusOptions))
+      return
     } 
-    else {
-      publisher.publish('ORDER_STATUS', setOrderStatus('error', 'Insufficient funds'))
-    } 
+
+    currentAmount = transactionAmount
+    publisher.publish('ORDER_STATUS', setPaymentStatus('success', 'Payment processed', statusOptions))
   })
 }
 
-processPayment()
-
-app.listen(PORT, ()=> {
-  console.log(`Payment service running on port ${PORT}`)
-})
+paymentProcessing()

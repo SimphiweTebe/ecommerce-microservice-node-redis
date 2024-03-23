@@ -1,4 +1,5 @@
 const express = require('express')
+
 const { publisher, consumer } = require('./config/redis')
 const fastFoods = require('./models/orders')
 const handleRequests = require('./middleware/handleRequests')
@@ -24,13 +25,15 @@ app.post('/order', processCheckout, async (req, res, next)=> {
 
   await consumer.subscribe('ORDER_STATUS', (message) => {
     const currentOrder = JSON.parse(message)
-    console.log(`order ${currentOrder.status} | ${currentOrder.time}`)
+    const { status, item, time } = currentOrder
+
+    console.log(`order ${status} --> ${item} --> ${time}`)
     
     if (message.status === 'order_success') {
       return res.status(201).json(currentOrder)
-    } else {
-      return res.status(400).json(currentOrder)
     }
+
+    return res.status(400).json(currentOrder)
   })
 })
 

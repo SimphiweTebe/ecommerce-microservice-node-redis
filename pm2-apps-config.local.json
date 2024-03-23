@@ -1,0 +1,22 @@
+{
+  "apps": [
+    {
+      "name": "orders-service",
+      "cwd": "orders-service-folder-on-localhost",
+      "script": "index.js",
+      "watch": true,
+      "env": {
+        "REDIS_PORT": 6379
+      }
+    },
+    {
+      "name": "payment-service",
+      "cwd": "payment-service-folder-on-localhost",
+      "script": "index.js",
+      "watch": true,
+      "env": {
+        "REDIS_PORT": 6379
+      }
+    }
+  ]
+}

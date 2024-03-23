@@ -11,13 +11,9 @@ const processCheckout = (req, res, next)=> {
     return res.status(404).json({ message: 'Order is missing name or quantity'})
   }
 
-  console.log(order.time)
-
   if(!order.time) {
-    order.time = setNewTimeStamp()
+    order.time = setNewTimeStamp
   }
-
-  console.log(order.time)
 
   next()
 }
