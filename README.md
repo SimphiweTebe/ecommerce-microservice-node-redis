@@ -1,13 +1,13 @@
 # Microservices with Express + Redis
 
-E-commerce application that takes orders from API requests and processes payment. Built with Node server (Express) and Redis pub/sub pattern. Uses PM2 to manage and monitor the application servers.
+Event driven Ecommerce microservices with orders and payment processing. Built on a Node server (Express) and Redis pub/sub pattern. Used PM2 to manage and monitor the application processes activity.
 
 ## Running the project
 
 - Install all dependencies by running `yarn`in order-service and payment-service folders
 - Run `yarn start` on each directory to start running services parallel
-- Use PM2 to run services in by running yarn install inside the root folder (if on localhost) then run `PM2 start all`
-- Use postman to make post requests
+- If you have PM2 installed globally inside the root folder run `PM2 start pm2-apps-config.local.json`  
+- You can use postman to make post requests
 
 ## Discoveries
 
