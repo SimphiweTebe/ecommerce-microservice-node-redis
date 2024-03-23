@@ -1,6 +1,6 @@
 # Microservice with Express and Redis
 
-E-commerce micro-services that takes orders requests and payment processing. Built with Node server (Express) and Redis pub/sub pattern.
+E-commerce application that takes orders from API requests and processes payment. Built with Node server (Express) and Redis pub/sub pattern.
 
 ## Running the project
 
