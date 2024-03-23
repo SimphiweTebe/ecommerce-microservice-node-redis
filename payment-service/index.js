@@ -7,27 +7,28 @@ const app = express()
 app.use(express.json())
 
 async function processPayment(){
-  let walletFunds = 700
+  let currentAmount = 700
 
   await consumer.subscribe('NEW_ORDER', (message) => {
     const currentOrder = JSON.parse(message)
     const { totalPrice, time, item } = currentOrder
-    const transactionData = { balance: walletFunds, totalPrice, time }
-
+    const isSuffiecientAmount = currentAmount >= totalPrice
+    const transactionAmount = currentAmount - totalPrice
+    
     const setOrderStatus = (status, message)=> {
+      const transactionData = { balance: currentAmount, totalPrice, time }
       const orderStatus = { ...transactionData, status, message, item }
       console.log(`${status} | ${message} | ${time}`)
       return JSON.stringify(orderStatus)
     }
 
-    if (walletFunds >= totalPrice){
-      walletFunds = walletFunds - totalPrice
+    if (isSuffiecientAmount){
+      currentAmount = transactionAmount
       publisher.publish('ORDER_STATUS', setOrderStatus('success', 'Payment processed'))
     } 
     else {
       publisher.publish('ORDER_STATUS', setOrderStatus('error', 'Insufficient funds'))
-    }
-     
+    } 
   })
 }
 

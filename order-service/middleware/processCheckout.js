@@ -1,3 +1,5 @@
+const { setNewTimeStamp } = require("../utilities/dateUtility")
+
 const processCheckout = (req, res, next)=> {
   const { order } = req.body
 
@@ -9,12 +11,13 @@ const processCheckout = (req, res, next)=> {
     return res.status(404).json({ message: 'Order is missing name or quantity'})
   }
 
-  const date = new Date()
+  console.log(order.time)
 
-  order.time = new Intl.DateTimeFormat('en-GB', {
-    dateStyle: 'full',
-    timeStyle: 'long',
-  }).format(date)
+  if(!order.time) {
+    order.time = setNewTimeStamp()
+  }
+
+  console.log(order.time)
 
   next()
 }
