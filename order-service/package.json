@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "express": "^4.19.1",
-    "node-redis-pubsub": "^5.0.0",
     "redis": "^4.6.13"
   },
   "devDependencies": {

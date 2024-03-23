@@ -6,7 +6,7 @@ const app = express()
 
 app.use(express.json())
 
-async function processOrders(){
+async function processPayment(){
   let walletFunds = 700
 
   await subscriber.subscribe('NEW_ORDER', (message) => {
@@ -20,7 +20,7 @@ async function processOrders(){
       return JSON.stringify(orderStatus)
     }
 
-    if (walletFunds > totalPrice){
+    if (walletFunds >= totalPrice){
       walletFunds = walletFunds - totalPrice
       client.publish('ORDER_STATUS', setOrderStatus('success', 'The order has been placed'))
     } 
@@ -31,7 +31,7 @@ async function processOrders(){
   })
 }
 
-processOrders()
+processPayment()
 
 app.listen(PORT, ()=> {
   console.log(`Payment service running on port ${PORT}`)
