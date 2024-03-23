@@ -1,30 +1,30 @@
 const express = require('express')
 const { publisher, consumer } = require('./config/redis')
 const fastFoods = require('./models/orders')
-const handleHeaderRequests = require('./middleware/headerRequest')
+const handleRequests = require('./middleware/handleRequests')
+const processCheckout = require('./middleware/processCheckout')
 
 const PORT = process.env.PORT || 4000
 const app = express()
 
 app.use(express.json())
-app.use((req, res, next)=> handleHeaderRequests(req, res, next))
+app.use('/order', handleRequests)
 
-app.post('/order', async (req, res, next)=> {
-  const { name, quantity } = req.body
-  
-  if (!name || !quantity) res.status(404).json({ message: 'Order is missing name or quanity'})
+app.post('/order', processCheckout, async (req, res, next)=> {
+  const { name, quantity, time } = req.body.order
 
   const receipt = {
-    name,
+    item: name,
     quantity,
-    totalPrice: quantity * fastFoods[name]
+    totalPrice: quantity * fastFoods[name],
+    time
   }
 
   await publisher.publish('NEW_ORDER', JSON.stringify(receipt))
 
   await consumer.subscribe('ORDER_STATUS', (message) => {
     const currentOrder = JSON.parse(message)
-    console.log(`orders status: ${currentOrder.status} | ${currentOrder.message}`)
+    console.log(`order ${currentOrder.status} | ${currentOrder.time}`)
     
     if (message.status === 'order_success') {
       return res.status(201).json(currentOrder)

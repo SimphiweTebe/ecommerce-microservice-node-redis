@@ -11,21 +11,21 @@ async function processPayment(){
 
   await consumer.subscribe('NEW_ORDER', (message) => {
     const currentOrder = JSON.parse(message)
-    const { totalPrice } = currentOrder
-    const transactionData = { balance: walletFunds, totalPrice }
+    const { totalPrice, time, item } = currentOrder
+    const transactionData = { balance: walletFunds, totalPrice, time }
 
     const setOrderStatus = (status, message)=> {
-      const orderStatus = { ...transactionData, status, message}
-      console.log(`payment status: ${status} | ${message}`)
+      const orderStatus = { ...transactionData, status, message, item }
+      console.log(`${status} | ${message} | ${time}`)
       return JSON.stringify(orderStatus)
     }
 
     if (walletFunds >= totalPrice){
       walletFunds = walletFunds - totalPrice
-      publisher.publish('ORDER_STATUS', setOrderStatus('success', 'The order has been placed'))
+      publisher.publish('ORDER_STATUS', setOrderStatus('success', 'Payment processed'))
     } 
     else {
-      publisher.publish('ORDER_STATUS', setOrderStatus('error', 'Wallet has insufficient funds'))
+      publisher.publish('ORDER_STATUS', setOrderStatus('error', 'Insufficient funds'))
     }
      
   })
