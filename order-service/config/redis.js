@@ -1,18 +1,16 @@
 const redis = require('redis')
 
-const REDIS_PORT = process.env.REDIS_PORT || 6379
-
-const client = redis.createClient({
+const publisher = redis.createClient({
   host: '127.0.0.1',
-  port: REDIS_PORT
+  port: process.env.REDIS_PORT || 6379
 })
 
-const subscriber = client.duplicate()
+const consumer = publisher.duplicate()
 
 const connectRedisInstance = async ()=> {
   try {
-    await client.connect()
-    await subscriber.connect()
+    await publisher.connect()
+    await consumer.connect()
   } catch (error) {
     console.log(`Redis connection error ${error.message}`)
   }
@@ -20,4 +18,4 @@ const connectRedisInstance = async ()=> {
 
 connectRedisInstance()
 
-module.exports = { client, subscriber }
+module.exports = { publisher, consumer }

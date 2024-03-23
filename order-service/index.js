@@ -1,5 +1,5 @@
 const express = require('express')
-const { client, subscriber } = require('./config/redis')
+const { publisher, consumer } = require('./config/redis')
 const fastFoods = require('./models/orders')
 const handleHeaderRequests = require('./middleware/headerRequest')
 
@@ -14,16 +14,17 @@ app.post('/order', async (req, res, next)=> {
   
   if (!name || !quantity) res.status(404).json({ message: 'Order is missing name or quanity'})
 
-  const orderReceipt = {
+  const receipt = {
     name,
     quantity,
     totalPrice: quantity * fastFoods[name]
   }
 
-  await client.publish('NEW_ORDER', JSON.stringify(orderReceipt))
+  await publisher.publish('NEW_ORDER', JSON.stringify(receipt))
 
-  await subscriber.subscribe('ORDER_STATUS', (message) => {
+  await consumer.subscribe('ORDER_STATUS', (message) => {
     const currentOrder = JSON.parse(message)
+    console.log(`orders status: ${currentOrder.status} | ${currentOrder.message}`)
     
     if (message.status === 'order_success') {
       return res.status(201).json(currentOrder)
