@@ -1,6 +1,7 @@
 const express = require('express')
-const redis = require('node-redis-pubsub')
+const client = require('./config/redis')
 const handleHeaderRequests = require('./middleware/headerRequest')
+const fastFoods = require('./models/orders')
 
 const PORT = process.env.PORT || 4000
 const app = express()
@@ -9,18 +10,7 @@ app.use(express.json())
 
 app.use((req, res, next)=> handleHeaderRequests(req, res, next));
 
-const client = new redis({
-  PORT: 6379,
-  scope: 'ecommerce-service'
-})
-
-const foodModel = {
-  burger: 120,
-  sausageRoll: 30,
-  chicken: 70
-}
-
-app.post('/order', (req, res, next)=> {
+app.post('/order', async (req, res, next)=> {
   const { name, quantity } = req.body
   
   if (!name || !quantity) {
@@ -32,22 +22,24 @@ app.post('/order', (req, res, next)=> {
   const orderReceipt = {
     name: name,
     quantity: quantity,
-    totalPrice: quantity * foodModel[name]
+    totalPrice: quantity * fastFoods[name]
   }
 
-  client.emit('NEW_ORDER', orderReceipt)
+  await client.publish('NEW_ORDER', JSON.stringify(orderReceipt))
 
-  client.on('ORDER_STATUS', (message)=> {
-    console.log(`Order service received status for order - ${name}:`, message)
+  res.send('Order sent')
 
-    if (message.status === 'order_success') {
-      return res.status(201).json(message)
-    } else {
-      return res.status(400).json(message)
-    }
-  })
+  // client.on('ORDER_STATUS', (message)=> {
+  //   console.log(`Order service received status for order - ${name}:`, message)
+
+  //   if (message.status === 'order_success') {
+  //     return res.status(201).json(message)
+  //   } else {
+  //     return res.status(400).json(message)
+  //   }
+  // })
 })
 
 app.listen(PORT, ()=> {
-  console.log(`Order service running on port ${PORT}`)
+  console.log(`Orders service started on port ${PORT}`)
 })
